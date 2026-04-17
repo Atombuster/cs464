@@ -12,19 +12,12 @@ import birds from '../../data/bird_population.json';
 import fish from '../../data/fish.json';
 import planets from '../../data/planets.json';
 
-import { DataFile } from '@/types/data';
+import { DatasetResponse } from '@/types/data';
 
 export default function Home() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const datasets: DataFile[] = [birds, fish, planets];
-  const { title, description } = datasets[selectedIndex];
-  const [shuffledItems, setShuffledItems] = useState(() => datasets[0].items);
-
-  useEffect(() => {
-    setShuffledItems(
-      [...datasets[selectedIndex].items].sort(() => Math.random() - 0.5)
-    );
-  }, [selectedIndex]);
+  const datasets: DatasetResponse[] = [birds, fish, planets]
+  const { title, description, items } = datasets[selectedIndex];
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2 }}>
