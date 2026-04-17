@@ -1,4 +1,4 @@
-import { DatasetItem, Dataset, DatasetResponse } from '@/types/data'
+import { Dataset, DatasetDatabaseItem } from '@/types/data'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export async function GET(request: Request) {
@@ -28,13 +28,14 @@ export async function GET(request: Request) {
                 .eq('dataset_id', dataset.id)
                 .order('item_order', { ascending: true })
 
-            const items = (itemsData || []) as DatasetItem[]
+            const items = (itemsData || []) as DatasetDatabaseItem[]
 
             if (itemsError) {
                 throw itemsError
             }
 
-            const dataFile: DatasetResponse = {
+            const dataFile: Dataset = {
+                id: dataset.id,
                 title: dataset.title,
                 description: dataset.description || '',
                 items: (items || []).map(item => ({
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
             throw datasetsError
         }
 
-        const allData: Record<string, DatasetResponse> = {}
+        const allData: Record<string, Dataset> = {}
 
         // fetch items for each dataset
         for (const dataset of datasets || []) {
@@ -68,13 +69,14 @@ export async function GET(request: Request) {
                 .eq('dataset_id', dataset.id)
                 .order('item_order', { ascending: true })
 
-            const items = (itemsData || []) as DatasetItem[]
+            const items = (itemsData || []) as DatasetDatabaseItem[]
 
             if (itemsError) {
                 throw itemsError
             }
 
-            allData[dataset.dataset_slug] = {
+            allData[dataset.dataset_slug ?? ""] = {
+                id: dataset.id,
                 title: dataset.title,
                 description: dataset.description || '',
                 items: (items || []).map(item => ({
