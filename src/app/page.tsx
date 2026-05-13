@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Box, Button } from '@mui/material';
+import Link from 'next/link';
 import { Dataset, DatasetItem, DatasetMeta } from '@/types/data';
 import DatasetPicker from '@/components/DatasetPicker';
 import FeedbackAlert from '@/components/FeedbackAlert';
@@ -80,9 +81,14 @@ export default function Home() {
         onSelect={setSelectedIndex}
       />
 
-      <Button variant="contained" onClick={handleCheckOrder} sx={{ mb: 2 }}>
-        Check Order
-      </Button>
+      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+        <Button variant="contained" onClick={handleCheckOrder}>
+          Check Order
+        </Button>
+        <Button variant="contained" component={Link} href="/add">
+          Add New Dataset
+        </Button>
+      </Box>
 
       <FeedbackAlert feedback={feedback} />
       <DatasetHeader dataset={dataset} />
