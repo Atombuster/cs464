@@ -6,19 +6,24 @@ export async function DELETE(
   request: Request) {
   const { searchParams } = new URL(request.url)
   const slug = searchParams.get('slug')
-  const supabase = getSupabaseClient();
+  const supabase = getSupabaseClient()
 
   if (slug) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('datasets')
       .delete()
-      .eq('dataset_slug', slug);
+      .eq('dataset_slug', slug)
+      .select();
 
     if (error) {
-      return Response.json({ error: "Failed to delete dataset" }, { status: 500 });
+      return Response.json({ error: error.message }, { status: 500 })
     }
 
-    return Response.json({ message: "Dataset deleted successfully" }, { status: 200 });
+    if (!data || data.length === 0) {
+      return Response.json({ message: `Dataset with slug ${slug} not found.` }, { status: 404 })
+    }
+
+    return Response.json({ message: "Successfully deleted", deletedItem: data[0] }, { status: 200 })
   }
-  return Response.json({ message: "No slug provided" }, { status: 400 });
+  return Response.json({ message: "No slug provided" }, { status: 400 })
 }
