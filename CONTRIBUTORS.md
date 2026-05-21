@@ -7,6 +7,7 @@ Thanks to everyone who contributed to this project.
 
 
 ## Contributors
+- Declan Bartel ([DBartel927](https://github.com/DBartel927))
 - Kyle Canepa ([Kyle423](https://github.com/Kyle423))
 - Jonas Cook ([JonasCookBeavs](https://github.com/JonasCookBeavs))
 - Brody Couture ([brodyC-456](https://github.com/brodyC-456))
