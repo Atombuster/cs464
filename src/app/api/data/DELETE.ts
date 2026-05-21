@@ -1,6 +1,4 @@
-import * as z from "zod";
 import { getSupabaseClient } from "@/lib/supabase";
-import { NextRequest } from "next/server";
 
 export async function DELETE(
   request: Request) {

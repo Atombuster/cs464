@@ -169,7 +169,7 @@ export default function UpdateDatasetPage() {
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2, position: 'relative', pb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
         <IconButton
-          onClick={() => router.push('/')}
+          onClick={() => router.back()}
           aria-label="close"
         >
           <CloseIcon sx={{ fontSize: 36, fontWeight: 'bold' }} />

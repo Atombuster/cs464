@@ -39,7 +39,7 @@ export default function Home() {
         datasetMeta={datasetMeta}
         onSelect={setSelectedIndex}
       />
-      <PuzzleGame dataset={dataset} slug={datasetMeta[selectedIndex]?.dataset_slug} />
+      <PuzzleGame dataset={dataset} slug={datasetMeta[selectedIndex]?.dataset_slug} key={dataset?.id ?? 0}/>
     </Box>
   );
 }
