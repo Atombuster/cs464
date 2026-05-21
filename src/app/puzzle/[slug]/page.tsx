@@ -37,7 +37,7 @@ export default function PuzzlePage() {
       {error ? (
         <Typography color="error">Puzzle not found.</Typography>
       ) : (
-        <PuzzleGame dataset={dataset} />
+        <PuzzleGame dataset={dataset} slug={params.slug} />
       )}
     </Box>
   );
