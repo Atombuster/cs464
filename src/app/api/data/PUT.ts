@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { getSupabaseClient } from "@/lib/supabase";
 import { NextRequest } from "next/server";
-import { DatasetItem, DatasetDatabaseItem } from '@/types/data'
+import { DatasetItem } from '@/types/data'
 
 export async function PUT(
   request: NextRequest) {

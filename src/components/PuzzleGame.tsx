@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button, Box } from '@mui/material';
 import { Dataset, DatasetItem } from '@/types/data';
@@ -17,7 +17,11 @@ type PuzzleGameProps = {
 
 export default function PuzzleGame({ dataset, slug }: PuzzleGameProps) {
   const router = useRouter();
-  const [shuffledItems, setShuffledItems] = useState<DatasetItem[]>([]);
+  const [shuffledItems, setShuffledItems] = useState<DatasetItem[]>(() => {
+    if (!dataset) return [];
+
+    return [...dataset.items].sort(() => Math.random() - 0.5);
+  });
   const [feedback, setFeedback] = useState<{
     severity: 'success' | 'info';
     message: string;
@@ -31,13 +35,6 @@ export default function PuzzleGame({ dataset, slug }: PuzzleGameProps) {
     return 'wrong';
   };
 
-  useEffect(() => {
-    if (dataset) {
-      const shuffled = [...dataset.items].sort(() => Math.random() - 0.5);
-      setShuffledItems(shuffled);
-      setFeedback(null);
-    }
-  }, [dataset]);
 
   const handleShuffleData = () => {
     if (dataset) {
@@ -78,8 +75,8 @@ export default function PuzzleGame({ dataset, slug }: PuzzleGameProps) {
         <Button variant="contained" onClick={handleCheckOrder}>
           Check Order
         </Button>
-        <Button variant ="contained" onClick={() => slug && router.push(`/update/${slug}`)}
-        disabled={!slug}
+        <Button variant="contained" onClick={() => slug && router.push(`/update/${slug}`)}
+          disabled={!slug}
         >Edit Dataset</Button>
         <Button variant="contained" onClick={handleShuffleData}>
           Shuffle
