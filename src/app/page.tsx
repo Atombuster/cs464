@@ -13,10 +13,16 @@ export default function Home() {
   const [datasetMeta, setDatasetMeta] = useState<DatasetMeta[]>([]);
 
   useEffect(() => {
-    fetch('/api/titles')
-      .then((r: Response) => r.json())
-      .then((data: DatasetMeta[]) => setDatasetMeta(data));
-  }, []);
+  fetch('/api/titles')
+    .then((r: Response) => r.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setDatasetMeta(data);
+      } else {
+        setDatasetMeta(data.datasets || []);
+      }
+    });
+}, []);
 
   useEffect(() => {
     if (datasetMeta.length > selectedIndex) {
@@ -33,7 +39,7 @@ export default function Home() {
         datasetMeta={datasetMeta}
         onSelect={setSelectedIndex}
       />
-      <PuzzleGame dataset={dataset} />
+      <PuzzleGame dataset={dataset} slug={datasetMeta[selectedIndex]?.dataset_slug} />
     </Box>
   );
 }
