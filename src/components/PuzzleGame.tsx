@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button, Box } from '@mui/material';
 import { Dataset, DatasetItem } from '@/types/data';
+import { ItemStatus } from "@/types/state";
 import FeedbackAlert from '@/components/FeedbackAlert';
 import DatasetHeader from '@/components/DatasetHeader';
 import DraggableDatasetItems from '@/components/DraggableDatasetItems';
@@ -27,7 +28,7 @@ export default function PuzzleGame({ dataset, slug }: PuzzleGameProps) {
     message: string;
   } | null>(null);
 
-  const getItemStatus = (item: DatasetItem, index: number) => {
+  const getItemStatus = (item: DatasetItem, index: number): ItemStatus => {
     if (!feedback) return 'default';
     const diff = Math.abs(item.order - (index + 1));
     if (diff === 0) return 'correct';
