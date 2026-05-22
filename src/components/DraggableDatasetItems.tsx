@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Reorder } from 'motion/react';
 import { DatasetItem } from '@/types/data';
+import { ItemStatus } from "@/types/state"
 import DatasetItemCard from './DatasetItemCard';
 
 interface DraggableDatasetItemsProps {
   shuffledItems: DatasetItem[];
   onReorder: (newOrder: DatasetItem[]) => void;
-  getItemStatus: (item: DatasetItem, index: number) => 'correct' | 'close' | 'wrong' | 'default';
+  getItemStatus: (item: DatasetItem, index: number) => ItemStatus;
 }
 
 const statusColors = {
@@ -39,6 +40,7 @@ export default function DraggableDatasetItems({ shuffledItems, onReorder, getIte
             item={item}
             isDragging={isDragging}
             statusColor={statusColors[getItemStatus(item, shuffledItems.indexOf(item))]}
+            dataState={getItemStatus(item, shuffledItems.indexOf(item))}
           />
         </Reorder.Item>
       ))}

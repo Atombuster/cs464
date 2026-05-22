@@ -1,0 +1,1 @@
+export const APP_TITLE = "CS464 Project";

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
+import { APP_TITLE } from "@/constants/app"
+
 export const metadata: Metadata = {
-  title: "CS464 Project",
+  title: APP_TITLE,
   description: "Yet-to-be-named project for cs464",
 };
 
