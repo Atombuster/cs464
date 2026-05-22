@@ -1,11 +1,15 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
   Box, Typography, TextField, Button, IconButton, Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+import { Dataset } from '@/types/data';
 
 function slugify(title: string): string {
   return title
@@ -13,27 +17,67 @@ function slugify(title: string): string {
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
-    .replace(/-+$/, '');
+    .replace(/^-+|-+$/g, '');
 }
 
 function extractErrorMessage(error: unknown): string {
   if (typeof error === 'string') return error;
+
   if (error && typeof error === 'object') {
-    if ('errors' in error) return extractErrorMessage((error as Record<string, unknown>).errors);
+    if ('errors' in error) {
+      return extractErrorMessage((error as Record<string, unknown>).errors);
+    }
+
     const entries = Object.entries(error as Record<string, unknown>);
-    if (entries.length > 0) return entries.map(([k, v]) => `${k}: ${extractErrorMessage(v)}`).join(', ');
+    if (entries.length > 0) {
+      return entries.map(([k, v]) => `${k}: ${extractErrorMessage(v)}`).join(', ');
+    }
   }
-  if (Array.isArray(error)) return error.map(extractErrorMessage).join(', ');
-  return 'An unknown error occurred';
+
+  if (Array.isArray(error)) {
+    return error.map(extractErrorMessage).join(', ');
+  }
+
+  return 'An error occurred';
 }
 
-export default function AddDatasetPage() {
+export default function UpdateDatasetPage() {
   const router = useRouter();
+  const params = useParams<{ slug: string }>();
+
+  const slug = params.slug;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [items, setItems] = useState(['', '']);
+  const [items, setItems] = useState<string[]>(['', '']);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDataset, setLoadingDataset] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+
+    fetch(`/api/data?name=${slug}`)
+      .then((r: Response) => {
+        if (!r.ok) {
+          throw new Error('Dataset not found');
+        }
+
+        return r.json();
+      })
+      .then((data: Dataset) => {
+        setTitle(data.title);
+        setDescription(data.description || '');
+        setItems(data.items.map(item => item.name));
+        setError(null);
+      })
+      .catch(() => {
+        setError('Dataset not found');
+      })
+      .finally(() => {
+        setLoadingDataset(false);
+      });
+  }, [slug]);
 
   const handleAddItem = () => setItems(prev => [...prev, '']);
 
@@ -41,31 +85,39 @@ export default function AddDatasetPage() {
     setItems(prev => prev.map((item, i) => (i === index ? value : item)));
   };
 
+  const handleDeleteItem = (index: number) => {
+    setItems(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSave = async () => {
     setError(null);
 
-    const slug = slugify(title);
+    const newSlug = slugify(title);
     const filledItems = items.filter(name => name.trim());
 
     if (!title.trim()) { setError('Dataset name is required'); return; }
-    if (slug.length < 3) { setError('Dataset name must be at least 3 characters'); return; }
+    if (newSlug.length < 3) { setError('Dataset name must be at least 3 characters'); return; }
     if (filledItems.length < 2) { setError('At least 2 items are required'); return; }
 
     setLoading(true);
+
     try {
-      const res = await fetch('/api/data', {
-        method: 'POST',
+      const res = await fetch(`/api/data?slug=${slug}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slug,
+          slug: newSlug,
           title: title.trim(),
           description: description.trim() || undefined,
-          items: filledItems.map((name, index) => ({ name: name.trim(), order: index + 1 })),
+          items: filledItems.map((name, index) => ({
+            name: name.trim(),
+            order: index + 1,
+          })),
         }),
       });
 
       if (res.ok) {
-        router.push('/');
+        router.push(`/puzzle/${newSlug}`);
       } else {
         const data = await res.json();
         setError(extractErrorMessage(data.error));
@@ -76,6 +128,42 @@ export default function AddDatasetPage() {
       setLoading(false);
     }
   };
+
+  const handleDeleteDataset = async () => {
+    const confirmed = window.confirm('Delete this dataset? This cannot be undone.');
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/data?slug=${slug}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        router.push('/');
+      } else {
+        const data = await res.json();
+        setError(extractErrorMessage(data.error || data.message));
+      }
+    } catch {
+      setError('Network error — please try again');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loadingDataset) {
+    return (
+      <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2 }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2, position: 'relative', pb: 4 }}>
@@ -91,7 +179,7 @@ export default function AddDatasetPage() {
       <Box sx={{ mb: 3 }}>
         <TextField
           fullWidth
-          label="Data set name"
+          label="Dataset name"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           slotProps={{ input: { 'aria-label': 'dataset name' } }}
@@ -114,13 +202,22 @@ export default function AddDatasetPage() {
             <Typography sx={{ width: 24, textAlign: 'right', flexShrink: 0, color: 'text.secondary' }}>
               {index + 1}
             </Typography>
+
             <TextField
               fullWidth
               value={item}
               onChange={(e) => handleItemChange(index, e.target.value)}
-              placeholder={index === 0 ? '1st Item' : index === 1 ? '2nd Item' : index === 0 ? '3rd Item' : `${index + 1}th Item`}
+              placeholder={index === 0 ? '1st Item' : index === 1 ? '2nd Item' : index === 2 ? '3rd Item' : `${index + 1}th Item`}
               size="small"
             />
+
+            <IconButton
+              onClick={() => handleDeleteItem(index)}
+              aria-label="delete item"
+              disabled={items.length <= 2}
+            >
+              <DeleteIcon />
+            </IconButton>
           </Box>
         ))}
       </Box>
@@ -134,7 +231,7 @@ export default function AddDatasetPage() {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
         <Button
           variant="outlined"
           onClick={() => router.push('/')}
@@ -151,6 +248,7 @@ export default function AddDatasetPage() {
         >
           Cancel
         </Button>
+
         <Button
           variant="outlined"
           onClick={handleSave}
@@ -168,6 +266,16 @@ export default function AddDatasetPage() {
           {loading ? 'Saving...' : 'SAVE'}
         </Button>
       </Box>
+
+      <Button
+        variant="outlined"
+        color="error"
+        fullWidth
+        onClick={handleDeleteDataset}
+        disabled={loading}
+      >
+        Delete Dataset
+      </Button>
     </Box>
   );
 }

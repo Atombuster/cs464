@@ -2,6 +2,10 @@ import * as z from "zod";
 import { getSupabaseClient } from "@/lib/supabase";
 import { NextRequest } from "next/server";
 
+import type { Database } from '@/types/supabase';
+
+type DatasetUpdate = Database['public']['Tables']['datasets']['Update'];
+
 const Data = z.object({
   slug: z.string().optional(),
   title: z.string().optional(),
@@ -17,7 +21,7 @@ export async function PATCH(
   try {
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
-    if (slug == null){
+    if (slug == null) {
       return Response.json({ error: "Missing required query parameter: slug" }, { status: 400 })
     }
 
@@ -39,7 +43,7 @@ export async function PATCH(
     }
 
     const datasetId = existingDataset.id;
-    const datasetUpdates: any = {
+    const datasetUpdates: DatasetUpdate = {
       updated_at: new Date().toISOString(),
     };
     if (body.slug) datasetUpdates.dataset_slug = body.slug;

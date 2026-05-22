@@ -7,7 +7,12 @@
     "dev": "npm run db:start && tsx scripts/dev-local.ts dev:server",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "typecheck": "tsc --noEmit",
     "sb": "supabase",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
@@ -35,13 +40,19 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/coverage-v8": "^4.1.6",
     "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "jsdom": "^29.1.1",
     "tsx": "^4.7.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.6"
   }
 }
