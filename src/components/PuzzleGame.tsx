@@ -93,6 +93,7 @@ export default function PuzzleGame({ dataset, slug }: PuzzleGameProps) {
         shuffledItems={shuffledItems}
         onReorder={handleReorder}
         getItemStatus={getItemStatus}
+        
       />
     </>
   );

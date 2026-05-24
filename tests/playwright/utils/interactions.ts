@@ -4,7 +4,7 @@ import { ItemStatus } from "../../../src/types/state"
 
 import { pause } from "./pause"
 
-const DRAG_PAUSE = 200
+const DRAG_PAUSE = 100
 
 export type PuzzleItem = {
   label: string
@@ -56,7 +56,7 @@ export async function dragItemToIndex(page: Page, fromIndex: number, toIndex: nu
   await page.mouse.move(
     toBox.x + toBox.width / 2,
     toBox.y + toBox.height / 2,
-    { steps: 50 }
+    { steps: 25 }
   )
 
   await page.mouse.up()
