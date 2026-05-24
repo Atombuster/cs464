@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button, Box } from '@mui/material';
 import { Dataset, DatasetItem } from '@/types/data';
@@ -8,14 +8,21 @@ import { ItemStatus } from "@/types/state";
 import FeedbackAlert from '@/components/FeedbackAlert';
 import DatasetHeader from '@/components/DatasetHeader';
 import DraggableDatasetItems from '@/components/DraggableDatasetItems';
+import { useRouter } from 'next/navigation';
 
 
 type PuzzleGameProps = {
   dataset: Dataset | null;
+  slug?: string;
 };
 
-export default function PuzzleGame({ dataset }: PuzzleGameProps) {
-  const [shuffledItems, setShuffledItems] = useState<DatasetItem[]>([]);
+export default function PuzzleGame({ dataset, slug }: PuzzleGameProps) {
+  const router = useRouter();
+  const [shuffledItems, setShuffledItems] = useState<DatasetItem[]>(() => {
+    if (!dataset) return [];
+
+    return [...dataset.items].sort(() => Math.random() - 0.5);
+  });
   const [feedback, setFeedback] = useState<{
     severity: 'success' | 'info';
     message: string;
@@ -29,13 +36,6 @@ export default function PuzzleGame({ dataset }: PuzzleGameProps) {
     return 'wrong';
   };
 
-  useEffect(() => {
-    if (dataset) {
-      const shuffled = [...dataset.items].sort(() => Math.random() - 0.5);
-      setShuffledItems(shuffled);
-      setFeedback(null);
-    }
-  }, [dataset]);
 
   const handleShuffleData = () => {
     if (dataset) {
@@ -76,6 +76,9 @@ export default function PuzzleGame({ dataset }: PuzzleGameProps) {
         <Button variant="contained" onClick={handleCheckOrder}>
           Check Order
         </Button>
+        <Button variant="contained" onClick={() => slug && router.push(`/update/${slug}`)}
+          disabled={!slug}
+        >Edit Dataset</Button>
         <Button variant="contained" onClick={handleShuffleData}>
           Shuffle
         </Button>
