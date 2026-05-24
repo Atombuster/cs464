@@ -1,0 +1,1 @@
+export type ItemStatus = 'correct' | 'close' | 'wrong' | 'default'
