@@ -1,17 +1,20 @@
 import { Card, CardContent, Typography } from '@mui/material';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import { DatasetItem } from '@/types/data';
+import { ItemStatus } from '@/types/state';
 
 interface DatasetItemCardProps {
   item: DatasetItem;
   isDragging: boolean;
   statusColor: string;
+  dataState: ItemStatus;
 }
 
-export default function DatasetItemCard({ item, isDragging, statusColor }: DatasetItemCardProps) {
+export default function DatasetItemCard({ item, isDragging, statusColor, dataState }: DatasetItemCardProps) {
   return (
     <Card
       variant="outlined"
+      data-state={dataState}
       sx={{
         cursor: isDragging ? 'grabbing' : 'grab',
         backgroundColor: statusColor,
