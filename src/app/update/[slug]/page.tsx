@@ -2,14 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  Box, Typography, TextField, Button, IconButton, Alert
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-
+import { Box, Typography, Alert } from '@mui/material';
 import { Dataset } from '@/types/data';
+import DatasetForm, { DatasetFormValues } from '@/components/DatasetForm';
 
 function slugify(title: string): string {
   return title
@@ -44,12 +39,9 @@ function extractErrorMessage(error: unknown): string {
 export default function UpdateDatasetPage() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
-
   const slug = params.slug;
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [items, setItems] = useState<string[]>(['', '']);
+  const [dataset, setDataset] = useState<Dataset | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDataset, setLoadingDataset] = useState(true);
@@ -66,9 +58,7 @@ export default function UpdateDatasetPage() {
         return r.json();
       })
       .then((data: Dataset) => {
-        setTitle(data.title);
-        setDescription(data.description || '');
-        setItems(data.items.map(item => item.name));
+        setDataset(data);
         setError(null);
       })
       .catch(() => {
@@ -79,17 +69,7 @@ export default function UpdateDatasetPage() {
       });
   }, [slug]);
 
-  const handleAddItem = () => setItems(prev => [...prev, '']);
-
-  const handleItemChange = (index: number, value: string) => {
-    setItems(prev => prev.map((item, i) => (i === index ? value : item)));
-  };
-
-  const handleDeleteItem = (index: number) => {
-    setItems(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSave = async () => {
+  const handleSave = async ({ title, description, items }: DatasetFormValues) => {
     setError(null);
 
     const newSlug = slugify(title);
@@ -117,7 +97,7 @@ export default function UpdateDatasetPage() {
       });
 
       if (res.ok) {
-        router.push(`/puzzle/${newSlug}`);
+        router.push('/');
       } else {
         const data = await res.json();
         setError(extractErrorMessage(data.error));
@@ -165,117 +145,26 @@ export default function UpdateDatasetPage() {
     );
   }
 
+  if (!dataset) {
+    return (
+      <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2 }}>
+        <Alert severity="error">{error || 'Dataset not found'}</Alert>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, px: 2, position: 'relative', pb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-        <IconButton
-          onClick={() => router.back()}
-          aria-label="close"
-        >
-          <CloseIcon sx={{ fontSize: 36, fontWeight: 'bold' }} />
-        </IconButton>
-      </Box>
-
-      <Box sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          label="Dataset name"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          slotProps={{ input: { 'aria-label': 'dataset name' } }}
-        />
-      </Box>
-
-      <TextField
-        fullWidth
-        label="Description"
-        multiline
-        rows={6}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        sx={{ mb: 3 }}
-      />
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-        {items.map((item, index) => (
-          <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Typography sx={{ width: 24, textAlign: 'right', flexShrink: 0, color: 'text.secondary' }}>
-              {index + 1}
-            </Typography>
-
-            <TextField
-              fullWidth
-              value={item}
-              onChange={(e) => handleItemChange(index, e.target.value)}
-              placeholder={index === 0 ? '1st Item' : index === 1 ? '2nd Item' : index === 2 ? '3rd Item' : `${index + 1}th Item`}
-              size="small"
-            />
-
-            <IconButton
-              onClick={() => handleDeleteItem(index)}
-              aria-label="delete item"
-              disabled={items.length <= 2}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
-        ))}
-      </Box>
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <IconButton onClick={handleAddItem} aria-label="add item">
-          <AddIcon sx={{ fontSize: 52 }} />
-        </IconButton>
-        <Typography variant="body2" align="center">Add new item</Typography>
-      </Box>
-
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-        <Button
-          variant="outlined"
-          onClick={() => router.push('/')}
-          disabled={loading}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderColor: '#e89b00',
-            color: '#e89b00',
-            borderWidth: 2,
-            fontWeight: 'bold',
-            '&:hover': { borderColor: '#c47e00', color: '#c47e00', borderWidth: 2, bgcolor: 'transparent' },
-          }}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          variant="outlined"
-          onClick={handleSave}
-          disabled={loading}
-          sx={{
-            flex: 1,
-            py: 1.5,
-            borderColor: '#3700cc',
-            color: '#3700cc',
-            borderWidth: 2,
-            fontWeight: 'bold',
-            '&:hover': { borderColor: '#2500aa', color: '#2500aa', borderWidth: 2, bgcolor: 'transparent' },
-          }}
-        >
-          {loading ? 'Saving...' : 'SAVE'}
-        </Button>
-      </Box>
-
-      <Button
-        variant="outlined"
-        color="error"
-        fullWidth
-        onClick={handleDeleteDataset}
-        disabled={loading}
-      >
-        Delete Dataset
-      </Button>
-    </Box>
+    <DatasetForm
+      initialTitle={dataset.title}
+      initialDescription={dataset.description || ''}
+      initialItems={dataset.items.map(item => item.name)}
+      loading={loading}
+      error={error}
+      saveLabel="SAVE"
+      showDelete
+      onSave={handleSave}
+      onCancel={() => router.push('/')}
+      onDelete={handleDeleteDataset}
+    />
   );
 }
