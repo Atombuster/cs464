@@ -11,7 +11,7 @@ export async function PUT(
     if (slug == null){
       return Response.json({ error: "Missing required query parameter: slug" }, { status: 400 })
     }
-    const supabase = getSupabaseClient();
+    const supabase = await getSupabaseClient();
     const body = await request.json();
     const orderSet = new Set(body.items.map((i: DatasetItem) => i.order));
     if (orderSet.size !== body.items.length) {

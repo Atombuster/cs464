@@ -25,8 +25,8 @@ export async function PATCH(
       return Response.json({ error: "Missing required query parameter: slug" }, { status: 400 })
     }
 
-    const supabase = getSupabaseClient();
-
+    const supabase = await getSupabaseClient();
+    
     const PartialData = Data.partial();
     const body = PartialData.parse(await request.json());
     if (Object.keys(body).length === 0) {

@@ -1,17 +1,22 @@
-import { getSupabaseClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase"
+import { NextRequest } from "next/server"
 
-export async function DELETE(
-  request: Request) {
+export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const slug = searchParams.get('slug')
-  const supabase = getSupabaseClient()
+  const supabase = await getSupabaseClient()
+  const user = (await supabase.auth.getUser()).data?.user
+
+  if(!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   if (slug) {
     const { data, error } = await supabase
       .from('datasets')
       .delete()
       .eq('dataset_slug', slug)
-      .select();
+      .select()
 
     if (error) {
       return Response.json({ error: error.message }, { status: 500 })
