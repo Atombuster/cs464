@@ -12,6 +12,9 @@ test('Puzzle is Solvable', async ({ page }) => {
   // Go to the site
   await page.goto('http://localhost:3000/puzzle/planets')
 
+  // Wait for the puzzle items to load
+  await page.locator('[data-state]').first().waitFor()
+
   await puzzleSolver(page)
 
   const solved = await isPuzzleSolved(page)

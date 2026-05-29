@@ -1,3 +1,5 @@
+'use client'
+
 import { Box, Container } from "@mui/material"
 import { LoginForm } from "@/components/supabase/login-form"
 
