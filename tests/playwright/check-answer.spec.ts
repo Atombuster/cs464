@@ -11,6 +11,9 @@ test('Check Answer Button is Functional', async ({ page }) => {
   // Check the page title
   await expect(page).toHaveTitle(APP_TITLE)
 
+  // Wait for the puzzle items to load
+  await page.locator('[data-state]').first().waitFor()
+
   await clickButtonByText(page, "Check Order")
 
   await expect(
