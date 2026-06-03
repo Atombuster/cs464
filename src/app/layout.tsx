@@ -1,6 +1,6 @@
 import { createServerClient } from "@/lib/supabase/createServerClient"
 import type { Metadata } from "next"
-import { LogoutButton } from "@/components/supabase/logout-button"
+import { AuthNav } from "@/components/supabase/auth-nav"
 
 import { APP_TITLE } from "@/constants/app"
 
@@ -16,11 +16,10 @@ export default async function RootLayout({
 }>) {
   const client = await createServerClient()
   const { data } = await client.auth.getUser()
-  const { user } = data
   return (
     <html lang="en">
       <body>
-        { user ? <LogoutButton /> : <></> }
+        <AuthNav initialUser={data.user} />
         {children}
       </body>
     </html>
